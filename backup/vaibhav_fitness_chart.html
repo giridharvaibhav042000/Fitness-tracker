@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaibhav's 6-Week Training Program</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dark: #0D0D14;
+    --darker: #07070D;
+    --card: #13131F;
+    --border: #1E1E30;
+    --gold: #FFD700;
+    --gold2: #FFA500;
+    --red: #FF3B3B;
+    --green: #00E676;
+    --blue: #00B0FF;
+    --purple: #CE93D8;
+    --orange: #FF9100;
+    --teal: #1DE9B6;
+    --text: #E8E8F0;
+    --muted: #6B6B8A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--darker);
+    font-family: 'Barlow', sans-serif;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    background: var(--dark);
+    padding: 48px 40px 36px;
+    border-bottom: 3px solid var(--gold);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 60% -10%, rgba(255,215,0,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,215,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,215,0,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .hero-content { position: relative; z-index: 2; }
+  .hero-top { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+  .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(48px, 7vw, 90px); line-height: 0.9; letter-spacing: 2px; color: var(--gold); text-shadow: 0 0 40px rgba(255,215,0,0.3); }
+  .hero-subtitle { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 6px; color: var(--text); text-transform: uppercase; margin-top: 8px; }
+  .hero-tag { font-size: 13px; font-weight: 500; letter-spacing: 3px; color: var(--gold2); text-transform: uppercase; margin-top: 4px; }
+  .stats-row { display: flex; gap: 32px; flex-wrap: wrap; }
+  .stat-box { text-align: center; }
+  .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--gold); line-height: 1; }
+  .stat-lbl { font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+
+  .legend-row {
+    display: flex; align-items: center; gap: 24px; margin-top: 20px; flex-wrap: wrap;
+    padding-top: 20px; border-top: 1px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .star-icon { color: var(--gold); font-size: 18px; filter: drop-shadow(0 0 6px var(--gold)); }
+  .dot-icon { width: 12px; height: 12px; border-radius: 50%; background: var(--muted); }
+
+  /* ── MAIN GRID ── */
+  .main { padding: 32px 40px; max-width: 1600px; margin: 0 auto; }
+
+  /* ── WEEK PROGRESSION ── */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+
+  .week-track {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+  .week-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 14px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  .week-card:hover { transform: translateY(-3px); }
+  .week-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+  }
+  .week-card.w1::before { background: #27AE60; }
+  .week-card.w2::before { background: #2980B9; }
+  .week-card.w3::before { background: #8E44AD; }
+  .week-card.w4::before { background: #D35400; }
+  .week-card.w5::before { background: #C0392B; }
+  .week-card.w6::before { background: var(--gold); }
+  .week-num { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--border); line-height: 1; position: absolute; right: 10px; top: 8px; }
+  .week-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+  .week-card.w1 .week-label { color: #27AE60; }
+  .week-card.w2 .week-label { color: #2980B9; }
+  .week-card.w3 .week-label { color: #8E44AD; }
+  .week-card.w4 .week-label { color: #D35400; }
+  .week-card.w5 .week-label { color: #C0392B; }
+  .week-card.w6 .week-label { color: var(--gold); }
+  .week-focus { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+  .week-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; margin: 2px 2px 2px 0; }
+  .pill-sets { background: rgba(0,176,255,0.15); color: var(--blue); }
+  .pill-reps { background: rgba(0,230,118,0.15); color: var(--green); }
+  .pill-rest { background: rgba(255,145,0,0.15); color: var(--orange); }
+
+  /* ── DAY SCHEDULE ── */
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  @media (max-width: 1100px) { .days-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 700px) { .days-grid { grid-template-columns: 1fr; } }
+
+  .day-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .day-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+  .day-header {
+    padding: 18px 20px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .day-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; }
+  .day-focus-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; opacity: 0.8; margin-top: 2px;
+  }
+  .day-emoji { font-size: 32px; }
+
+  .day-body { padding: 0 14px 14px; }
+
+  .exercise-row {
+    display: flex; align-items: center;
+    padding: 9px 10px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    gap: 10px;
+    position: relative;
+    transition: background 0.15s;
+  }
+  .exercise-row:hover { background: rgba(255,255,255,0.04); }
+  .ex-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px; color: var(--muted);
+    min-width: 20px; text-align: right;
+  }
+  .ex-name {
+    flex: 1;
+    font-size: 13px; font-weight: 500;
+    line-height: 1.3;
+  }
+  .ex-name.compulsory { color: var(--text); font-weight: 600; }
+  .ex-name.optional { color: #9090AA; font-weight: 400; }
+
+  .ex-badge {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 3px; min-width: 60px;
+  }
+  .badge {
+    font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 10px; white-space: nowrap;
+  }
+  .badge-sets { background: rgba(0,176,255,0.2); color: var(--blue); }
+  .badge-reps { background: rgba(0,230,118,0.15); color: var(--green); }
+
+  .star-compulsory {
+    font-size: 16px;
+    filter: drop-shadow(0 0 5px #FFD700);
+    animation: starPulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes starPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.25); opacity: 0.8; }
+  }
+
+  .divider-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--muted);
+    padding: 8px 10px 4px;
+  }
+
+  /* Day color themes */
+  .mon .day-header { background: linear-gradient(135deg, #0F3D1F, #1A6B3C); }
+  .mon .day-name { color: #4AE07A; }
+  .tue .day-header { background: linear-gradient(135deg, #0D2A40, #1A527A); }
+  .tue .day-name { color: #5BB8F5; }
+  .wed .day-header { background: linear-gradient(135deg, #2D0F45, #5B2C6F); }
+  .wed .day-name { color: #CE93D8; }
+  .thu .day-header { background: linear-gradient(135deg, #3D2000, #7D5310); }
+  .thu .day-name { color: #FFB347; }
+  .fri .day-header { background: linear-gradient(135deg, #3D0D0D, #7B241C); }
+  .fri .day-name { color: #FF7070; }
+  .sat .day-header { background: linear-gradient(135deg, #063D35, #0E6655); }
+  .sat .day-name { color: #1DE9B6; }
+
+  /* ── KEY EXERCISES HIGHLIGHT ── */
+  .key-section {
+    background: var(--card);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .key-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 50% 80% at 0% 50%, rgba(255,215,0,0.04), transparent);
+    pointer-events: none;
+  }
+  .key-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-top: 16px;
+  }
+  @media (max-width: 900px) { .key-grid { grid-template-columns: repeat(3,1fr); } }
+  @media (max-width: 600px) { .key-grid { grid-template-columns: repeat(2,1fr); } }
+  .key-ex-card {
+    background: rgba(255,215,0,0.05);
+    border: 1px solid rgba(255,215,0,0.15);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .key-ex-card:hover {
+    background: rgba(255,215,0,0.1);
+    border-color: rgba(255,215,0,0.35);
+    transform: scale(1.03);
+  }
+  .key-star { font-size: 22px; display: block; margin-bottom: 6px; filter: drop-shadow(0 0 8px #FFD700); }
+  .key-name { font-size: 12px; font-weight: 700; color: var(--gold); line-height: 1.3; }
+  .key-muscle { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+  /* ── SUNDAY ── */
+  .sunday-card {
+    background: linear-gradient(135deg, #0D1117, #131C29);
+    border: 1px solid #1E2D45;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  }
+  .sunday-emoji { font-size: 48px; }
+  .sunday-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: #4FC3F7; }
+  .sunday-sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
+  .sunday-items { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+  .sunday-pill {
+    padding: 6px 16px; border-radius: 20px;
+    font-size: 13px; font-weight: 600;
+    background: rgba(79,195,247,0.1); color: #4FC3F7;
+    border: 1px solid rgba(79,195,247,0.2);
+  }
+
+  /* ── PRINCIPLES ── */
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 40px;
+  }
+  @media (max-width: 900px) { .principles-grid { grid-template-columns: repeat(2,1fr); } }
+  .principle-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .principle-icon { font-size: 28px; flex-shrink: 0; }
+  .principle-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .principle-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--muted);
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  .footer span { color: var(--gold); }
+
+  /* ── ANIMATE IN ── */
+  .fade-in { animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .day-card:nth-child(1) { animation-delay: 0.05s; }
+  .day-card:nth-child(2) { animation-delay: 0.10s; }
+  .day-card:nth-child(3) { animation-delay: 0.15s; }
+  .day-card:nth-child(4) { animation-delay: 0.20s; }
+  .day-card:nth-child(5) { animation-delay: 0.25s; }
+  .day-card:nth-child(6) { animation-delay: 0.30s; }
+  .day-card { animation: fadeUp 0.5s ease both; }
+
+  .rest-tag {
+    font-size: 10px; color: var(--orange); font-weight: 600;
+    padding: 1px 6px; border-radius: 6px;
+    background: rgba(255,145,0,0.1);
+    margin-left: auto; white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-top">
+      <div>
+        <div class="hero-title">VAIBHAV'S<br>6-WEEK PLAN</div>
+        <div class="hero-subtitle">Weight Training — Gents</div>
+        <div class="hero-tag">⭐ = Compulsory &nbsp;|&nbsp; Norbert's Fitness Studio &nbsp;|&nbsp; Age 16–40</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-val">75.2</div>
+          <div class="stat-lbl">Start kg</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">5'5"</div>
+          <div class="stat-lbl">Height</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">6</div>
+          <div class="stat-lbl">Weeks</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">6</div>
+          <div class="stat-lbl">Days/wk</div>
+        </div>
+      </div>
+    </div>
+    <div class="legend-row">
+      <div class="legend-item"><span class="star-icon">⭐</span> Compulsory – Must Do Every Session</div>
+      <div class="legend-item"><span style="color:var(--muted);font-size:16px;">○</span>&nbsp; Optional – Do if time allows</div>
+      <div class="legend-item"><span style="color:var(--blue);font-size:13px;font-weight:700;">SETS</span>&nbsp; Sets count</div>
+      <div class="legend-item"><span style="color:var(--green);font-size:13px;font-weight:700;">REPS</span>&nbsp; Rep range</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- WEEK PROGRESSION -->
+  <div class="section-title">📈 6-WEEK PROGRESSION PLAN</div>
+  <div class="week-track">
+    <div class="week-card w1">
+      <div class="week-num">1</div>
+      <div class="week-label">Foundation</div>
+      <div class="week-focus">Learn the Lifts</div>
+      <span class="week-pill pill-sets">Sets: 3–4</span>
+      <span class="week-pill pill-reps">Reps: 10–12</span>
+      <span class="week-pill pill-rest">Rest: 60–90s</span>
+    </div>
+    <div class="week-card w2">
+      <div class="week-num">2</div>
+      <div class="week-label">Build Strength</div>
+      <div class="week-focus">Add Weight</div>
+      <span class="week-pill pill-sets">Sets: 4</span>
+      <span class="week-pill pill-reps">Reps: 8–12</span>
+      <span class="week-pill pill-rest">Rest: 60–90s</span>
+    </div>
+    <div class="week-card w3">
+      <div class="week-num">3</div>
+      <div class="week-label">Increase Volume</div>
+      <div class="week-focus">More Sets</div>
+      <span class="week-pill pill-sets">Sets: 4–5</span>
+      <span class="week-pill pill-reps">Reps: 8–12</span>
+      <span class="week-pill pill-rest">Rest: 60–90s</span>
+    </div>
+    <div class="week-card w4">
+      <div class="week-num">4</div>
+      <div class="week-label">Deload</div>
+      <div class="week-focus">Recover Smart</div>
+      <span class="week-pill pill-sets">Sets: 3</span>
+      <span class="week-pill pill-reps">Reps: 12–15</span>
+      <span class="week-pill pill-rest">Rest: 45–60s</span>
+    </div>
+    <div class="week-card w5">
+      <div class="week-num">5</div>
+      <div class="week-label">Intensify</div>
+      <div class="week-focus">Push Harder</div>
+      <span class="week-pill pill-sets">Sets: 4–5</span>
+      <span class="week-pill pill-reps">Reps: 6–10</span>
+      <span class="week-pill pill-rest">Rest: 60–90s</span>
+    </div>
+    <div class="week-card w6">
+      <div class="week-num">6</div>
+      <div class="week-label">Peak</div>
+      <div class="week-focus">Maximum Effort</div>
+      <span class="week-pill pill-sets">Sets: 4–5</span>
+      <span class="week-pill pill-reps">Reps: 6–8</span>
+      <span class="week-pill pill-rest">Rest: 90s</span>
+    </div>
+  </div>
+
+  <!-- COMPULSORY HIGHLIGHTS -->
+  <div class="section-title">⭐ MUST-DO COMPULSORY EXERCISES</div>
+  <div class="key-section">
+    <div style="font-size:13px;color:var(--muted);">These exercises form the backbone of your transformation. Never skip them — they drive 80% of your results.</div>
+    <div class="key-grid">
+      <div class="key-ex-card"><span class="key-star">⭐</span><div class="key-name">Barbell Back Squat</div><div class="key-muscle">Quads · Glutes · Core</div></div>
+      <div class="key-ex-card"><span class="key-star">⭐</span><div class="key-name">Deadlift</div><div class="key-muscle">Full Posterior Chain</div></div>
+      <div class="key-ex-card"><span class="key-star">⭐</span><div class="key-name">Flat Bench Press</div><div class="key-muscle">Chest · Triceps · Front Delt</div></div>
+      <div class="key-ex-card"><span class="key-star">⭐</span><div class="key-name">Bent-Over Barbell Row</div><div class="key-muscle">Back Thickness · Biceps</div></div>
+      <div class="key-ex-card"><span class="key-star">⭐</span><div class="key-name">Overhead Press</div><div class="key-muscle">Shoulders · Triceps · Core</div></div>
+      <div class="key-ex-card"><span class="key-star">⭐</span><div class="key-name">Romanian Deadlift</div><div class="key-muscle">Hamstrings · Glutes</div></div>
+      <div class="key-ex-card"><span class="key-star">⭐</span><div class="key-name">Lat Pulldown</div><div class="key-muscle">Lats · Back Width</div></div>
+      <div class="key-ex-card"><span class="key-star">⭐</span><div class="key-name">Bulgarian Split Squat</div><div class="key-muscle">Quads · Glutes · Balance</div></div>
+      <div class="key-ex-card"><span class="key-star">⭐</span><div class="key-name">Plank</div><div class="key-muscle">Core · Stability</div></div>
+      <div class="key-ex-card"><span class="key-star">⭐</span><div class="key-name">Barbell Curl</div><div class="key-muscle">Biceps Peak</div></div>
+    </div>
+  </div>
+
+  <!-- DAY SCHEDULE -->
+  <div class="section-title">📅 DAILY WORKOUT SCHEDULE</div>
+  <div class="days-grid">
+
+    <!-- MONDAY -->
+    <div class="day-card mon">
+      <div class="day-header">
+        <div>
+          <div class="day-name">MONDAY</div>
+          <div class="day-focus-tag">🦵 Lower Body Heavy</div>
+        </div>
+        <div class="day-emoji">🦵</div>
+      </div>
+      <div class="day-body">
+        <div class="divider-label">⭐ Compulsory</div>
+        <div class="exercise-row">
+          <span class="ex-num">1</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Barbell Back Squat</span>
+          <div class="ex-badge"><span class="badge badge-sets">4 Sets</span><span class="badge badge-reps">6–8 Reps</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">2</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Romanian Deadlift</span>
+          <div class="ex-badge"><span class="badge badge-sets">4 Sets</span><span class="badge badge-reps">8–10</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">3</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Leg Press</span>
+          <div class="ex-badge"><span class="badge badge-sets">4 Sets</span><span class="badge badge-reps">6–8</span></div>
+        </div>
+        <div class="divider-label">○ Accessory</div>
+        <div class="exercise-row">
+          <span class="ex-num">4</span><span style="width:16px"></span>
+          <span class="ex-name optional">Walking Lunges</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12/leg</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">5</span><span style="width:16px"></span>
+          <span class="ex-name optional">Leg Curl (Machine)</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">6</span><span style="width:16px"></span>
+          <span class="ex-name optional">Leg Extension</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">7</span><span style="width:16px"></span>
+          <span class="ex-name optional">Standing Calf Raise</span>
+          <div class="ex-badge"><span class="badge badge-sets">4 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">8</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Plank</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">30–45s</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TUESDAY -->
+    <div class="day-card tue">
+      <div class="day-header">
+        <div>
+          <div class="day-name">TUESDAY</div>
+          <div class="day-focus-tag">💪 Chest + Triceps</div>
+        </div>
+        <div class="day-emoji">💪</div>
+      </div>
+      <div class="day-body">
+        <div class="divider-label">⭐ Compulsory</div>
+        <div class="exercise-row">
+          <span class="ex-num">1</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Flat Bench Press</span>
+          <div class="ex-badge"><span class="badge badge-sets">4 Sets</span><span class="badge badge-reps">6–10</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">2</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Incline Bench Press</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">8–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">3</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Close Grip Bench Press</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">8–12</span></div>
+        </div>
+        <div class="divider-label">○ Accessory</div>
+        <div class="exercise-row">
+          <span class="ex-num">4</span><span style="width:16px"></span>
+          <span class="ex-name optional">Decline Bench Press</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">8–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">5</span><span style="width:16px"></span>
+          <span class="ex-name optional">Dumbbell Flyes</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">6</span><span style="width:16px"></span>
+          <span class="ex-name optional">Pec-Dec / Cable Cross</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">7</span><span style="width:16px"></span>
+          <span class="ex-name optional">Overhead Triceps Ext.</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">8</span><span style="width:16px"></span>
+          <span class="ex-name optional">Cable Pushdown</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">9</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Plank</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">30–45s</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEDNESDAY -->
+    <div class="day-card wed">
+      <div class="day-header">
+        <div>
+          <div class="day-name">WEDNESDAY</div>
+          <div class="day-focus-tag">🔙 Back + Biceps</div>
+        </div>
+        <div class="day-emoji">🔙</div>
+      </div>
+      <div class="day-body">
+        <div class="divider-label">⭐ Compulsory</div>
+        <div class="exercise-row">
+          <span class="ex-num">1</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Deadlift</span>
+          <div class="ex-badge"><span class="badge badge-sets">4 Sets</span><span class="badge badge-reps">5–6</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">2</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Bent-Over Barbell Row</span>
+          <div class="ex-badge"><span class="badge badge-sets">4 Sets</span><span class="badge badge-reps">8–10</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">3</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Lat Pulldown</span>
+          <div class="ex-badge"><span class="badge badge-sets">4 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">4</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Barbell Curl</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">8–12</span></div>
+        </div>
+        <div class="divider-label">○ Accessory</div>
+        <div class="exercise-row">
+          <span class="ex-num">5</span><span style="width:16px"></span>
+          <span class="ex-name optional">Seated Cable Row</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">6</span><span style="width:16px"></span>
+          <span class="ex-name optional">One-Arm DB Row</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">7</span><span style="width:16px"></span>
+          <span class="ex-name optional">Face Pull</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">8</span><span style="width:16px"></span>
+          <span class="ex-name optional">Hammer Curl</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">9</span><span style="width:16px"></span>
+          <span class="ex-name optional">Preacher Curl</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THURSDAY -->
+    <div class="day-card thu">
+      <div class="day-header">
+        <div>
+          <div class="day-name">THURSDAY</div>
+          <div class="day-focus-tag">🏋️ Legs + Shoulders</div>
+        </div>
+        <div class="day-emoji">🏋️</div>
+      </div>
+      <div class="day-body">
+        <div class="divider-label">⭐ Compulsory</div>
+        <div class="exercise-row">
+          <span class="ex-num">1</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Front Squat</span>
+          <div class="ex-badge"><span class="badge badge-sets">4 Sets</span><span class="badge badge-reps">6–10</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">2</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Bulgarian Split Squat</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12/leg</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">3</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Seated Shoulder Press</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">8–12</span></div>
+        </div>
+        <div class="divider-label">○ Accessory</div>
+        <div class="exercise-row">
+          <span class="ex-num">4</span><span style="width:16px"></span>
+          <span class="ex-name optional">Leg Press</span>
+          <div class="ex-badge"><span class="badge badge-sets">4 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">5</span><span style="width:16px"></span>
+          <span class="ex-name optional">Leg Extension</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">6</span><span style="width:16px"></span>
+          <span class="ex-name optional">Seated Leg Curl</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">7</span><span style="width:16px"></span>
+          <span class="ex-name optional">Lateral Raise</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">8</span><span style="width:16px"></span>
+          <span class="ex-name optional">Front Raise</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">9</span><span style="width:16px"></span>
+          <span class="ex-name optional">Calf Raise</span>
+          <div class="ex-badge"><span class="badge badge-sets">4 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FRIDAY -->
+    <div class="day-card fri">
+      <div class="day-header">
+        <div>
+          <div class="day-name">FRIDAY</div>
+          <div class="day-focus-tag">🔥 Upper Body Hypertrophy</div>
+        </div>
+        <div class="day-emoji">🔥</div>
+      </div>
+      <div class="day-body">
+        <div class="divider-label">⭐ Compulsory</div>
+        <div class="exercise-row">
+          <span class="ex-num">1</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Incline Bench Press</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">8–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">2</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">DB Shoulder Press</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">8–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">3</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Lat Pulldown (Wide)</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">4</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">EZ Bar Curl</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+        <div class="divider-label">○ Accessory</div>
+        <div class="exercise-row">
+          <span class="ex-num">5</span><span style="width:16px"></span>
+          <span class="ex-name optional">Cable Row</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">10–12</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">6</span><span style="width:16px"></span>
+          <span class="ex-name optional">Dumbbell Fly</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">7</span><span style="width:16px"></span>
+          <span class="ex-name optional">Rope Pushdown</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">8</span><span style="width:16px"></span>
+          <span class="ex-name optional">Front Raise</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">9</span><span style="width:16px"></span>
+          <span class="ex-name optional">Reverse Fly</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SATURDAY -->
+    <div class="day-card sat">
+      <div class="day-header">
+        <div>
+          <div class="day-name">SATURDAY</div>
+          <div class="day-focus-tag">💥 Full Body + Conditioning</div>
+        </div>
+        <div class="day-emoji">💥</div>
+      </div>
+      <div class="day-body">
+        <div class="divider-label">⭐ Compulsory</div>
+        <div class="exercise-row">
+          <span class="ex-num">1</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Kettlebell Swing</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">15 Reps</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">2</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Dumbbell Thruster</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12 Reps</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">3</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Cardio (Incline Walk)</span>
+          <div class="ex-badge"><span class="badge badge-sets">1 Set</span><span class="badge badge-reps">15–20 min</span></div>
+        </div>
+        <div class="divider-label">○ Accessory</div>
+        <div class="exercise-row">
+          <span class="ex-num">4</span><span style="width:16px"></span>
+          <span class="ex-name optional">Goblet Squat</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">5</span><span style="width:16px"></span>
+          <span class="ex-name optional">Push-Ups</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">15 Reps</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">6</span><span style="width:16px"></span>
+          <span class="ex-name optional">Bent-Over Row (DB)</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">12–15</span></div>
+        </div>
+        <div class="exercise-row">
+          <span class="ex-num">7</span><span class="star-compulsory">⭐</span>
+          <span class="ex-name compulsory">Plank</span>
+          <div class="ex-badge"><span class="badge badge-sets">3 Sets</span><span class="badge badge-reps">45 sec</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SUNDAY -->
+  <div class="sunday-card">
+    <div class="sunday-emoji">🧘</div>
+    <div>
+      <div class="sunday-title">SUNDAY — ACTIVE RECOVERY</div>
+      <div class="sunday-sub">Rest is where muscles actually grow. Don't skip this day.</div>
+      <div class="sunday-items">
+        <span class="sunday-pill">🚶 Light Walk 30–60 min</span>
+        <span class="sunday-pill">🤸 Full Body Stretch</span>
+        <span class="sunday-pill">🦵 Foam Rolling</span>
+        <span class="sunday-pill">💧 Extra Hydration</span>
+        <span class="sunday-pill">😴 8 hrs Sleep Target</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINCIPLES -->
+  <div class="section-title">🏆 PRINCIPLES FOR TRANSFORMATION</div>
+  <div class="principles-grid">
+    <div class="principle-card">
+      <div class="principle-icon">📈</div>
+      <div>
+        <div class="principle-title">Progressive Overload</div>
+        <div class="principle-desc">Add weight or reps every week. If you lifted 20kg for 8 reps last week, aim for 20kg × 9 reps or 22.5kg × 8 reps this week.</div>
+      </div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">🥩</div>
+      <div>
+        <div class="principle-title">High Protein: 120–130g/day</div>
+        <div class="principle-desc">Chicken, eggs, paneer, dal, curd, whey. Without protein, your muscles cannot grow no matter how hard you train.</div>
+      </div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">😴</div>
+      <div>
+        <div class="principle-title">7–8 Hours Sleep</div>
+        <div class="principle-desc">Testosterone and growth hormone peak during deep sleep. Cutting sleep cuts your gains. Non-negotiable.</div>
+      </div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">💧</div>
+      <div>
+        <div class="principle-title">3–4 Litres Water Daily</div>
+        <div class="principle-desc">Dehydration drops strength by 10–15%. Drink 500ml before your workout, sip through the session.</div>
+      </div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">📝</div>
+      <div>
+        <div class="principle-title">Log Every Session</div>
+        <div class="principle-desc">If you don't track weight + reps, you can't know if you're progressing. Use the Excel tracker every single session.</div>
+      </div>
+    </div>
+    <div class="principle-card">
+      <div class="principle-icon">🎯</div>
+      <div>
+        <div class="principle-title">Form Before Weight</div>
+        <div class="principle-desc">One injury can set you back 4–8 weeks. Master form first, especially on Squat, Deadlift, and Bench Press.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>★ FOCUS ON PROGRESS, NOT PERFECTION ★</span> &nbsp;|&nbsp; Vaibhav Giridhar &nbsp;|&nbsp; Norbert's Fitness Studio &nbsp;|&nbsp; 6-Week Transformation
+</div>
+
+</body>
+</html>
