@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNutrition } from '../hooks/useNutrition'
 import { FOOD_DATABASE, MACRO_TARGETS, calcCalories } from '../data/nutrition'
 import MacroBar from '../components/MacroBar'
+import { analyzeText } from '../services/aiNutritionService'
 
 // ── Weekly diet plan data ─────────────────────────────────────────────────────
 
@@ -101,11 +102,58 @@ export default function Nutrition() {
     const d = new Date().getDay() // 0=Sun
     return d === 0 ? 6 : d - 1   // map to Mon=0 … Sun=6
   })
+  const [activeTab, setActiveTab]     = useState('search')
+  const [query, setQuery]             = useState('')
+  const [aiResults, setAiResults]     = useState([])
+  const [aiLoading, setAiLoading]     = useState(false)
+  const [aiError, setAiError]         = useState(null)
+  const [loggedFlash, setLoggedFlash] = useState(false)
 
   const filtered = search.length > 1
     ? Object.entries(FOOD_DATABASE).filter(([name]) =>
         name.toLowerCase().includes(search.toLowerCase()))
     : []
+
+  async function handleAnalyze() {
+    if (!query.trim() || aiLoading) return
+    setAiLoading(true)
+    setAiError(null)
+    setAiResults([])
+    setLoggedFlash(false)
+    try {
+      const foods = await analyzeText(query)
+      setAiResults(foods)
+    } catch (err) {
+      const status = err.message
+      if (!navigator.onLine) {
+        setAiError("Can't reach Gemini — check connection")
+      } else if (status === '401' || status === '403') {
+        setAiError('API key invalid')
+      } else if (status === '429') {
+        setAiError('Too many requests — wait a moment and retry')
+      } else {
+        setAiError("Couldn't parse food data — try rephrasing")
+      }
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  async function handleLogAll() {
+    for (const food of aiResults) {
+      await addMeal({
+        meal_name: food.name,
+        protein:   food.protein,
+        carbs:     food.carbs,
+        fats:      food.fats,
+        calories:  food.calories,
+      })
+    }
+    setAiResults([])
+    setQuery('')
+    setLoggedFlash(true)
+    setTimeout(() => setLoggedFlash(false), 2000)
+  }
 
   async function handleAdd(name, macros) {
     await addMeal({
@@ -131,26 +179,101 @@ export default function Nutrition() {
         </p>
       </div>
 
-      <div>
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search food..."
-          className="w-full bg-card border border-line rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-gym"
-        />
-        {filtered.length > 0 && (
-          <div className="mt-2 bg-card border border-line rounded-xl overflow-hidden">
-            {filtered.map(([name, macros]) => (
-              <button key={name} onClick={() => handleAdd(name, macros)}
-                className="w-full text-left px-4 py-3 border-b border-line last:border-0 hover:bg-surface">
-                <p className="text-white text-sm">{name}</p>
-                <p className="text-muted text-xs">P:{macros.protein}g C:{macros.carbs}g F:{macros.fats}g</p>
-              </button>
-            ))}
-          </div>
-        )}
+      {/* ── Tab switcher ── */}
+      <div className="flex gap-2">
+        {['search', 'ai'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => { setActiveTab(tab); setAiResults([]); setAiError(null); setSearch('') }}
+            className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition-colors ${
+              activeTab === tab
+                ? 'bg-gym text-black border-gym'
+                : 'bg-surface border-line text-muted'
+            }`}
+          >
+            {tab === 'search' ? 'Search Food' : '✦ AI Analyze'}
+          </button>
+        ))}
       </div>
+
+      {/* ── Search tab ── */}
+      {activeTab === 'search' && (
+        <div>
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search food..."
+            className="w-full bg-card border border-line rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-gym"
+          />
+          {filtered.length > 0 && (
+            <div className="mt-2 bg-card border border-line rounded-xl overflow-hidden">
+              {filtered.map(([name, macros]) => (
+                <button key={name} onClick={() => handleAdd(name, macros)}
+                  className="w-full text-left px-4 py-3 border-b border-line last:border-0 hover:bg-surface">
+                  <p className="text-white text-sm">{name}</p>
+                  <p className="text-muted text-xs">P:{macros.protein}g C:{macros.carbs}g F:{macros.fats}g</p>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── AI Analyze tab ── */}
+      {activeTab === 'ai' && (
+        <div className="space-y-3">
+          <textarea
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleAnalyze() }}
+            placeholder="Describe your meal... e.g. 2 chapatis, 1 bowl dal, 1 glass milk"
+            rows={3}
+            disabled={aiLoading}
+            className="w-full bg-card border border-line rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-gym resize-none disabled:opacity-50"
+          />
+          <button
+            onClick={handleAnalyze}
+            disabled={aiLoading || !query.trim() || !navigator.onLine}
+            className="w-full py-3 rounded-lg bg-gym text-black font-semibold text-sm disabled:opacity-40"
+          >
+            {aiLoading ? 'Analyzing...' : !navigator.onLine ? 'No connection' : 'Analyze →'}
+          </button>
+
+          {aiError && (
+            <div className="bg-warn/10 border border-warn/30 rounded-xl px-4 py-3 flex items-center justify-between">
+              <p className="text-warn text-sm">{aiError}</p>
+              <button onClick={handleAnalyze} className="text-warn text-xs underline ml-3">Retry</button>
+            </div>
+          )}
+
+          {loggedFlash && (
+            <p className="text-gym text-sm text-center font-semibold">✓ Meals logged</p>
+          )}
+
+          {aiResults.length > 0 && (
+            <div className="space-y-2">
+              {aiResults.map((food, i) => (
+                <div key={i} className="bg-card border border-line rounded-xl p-3">
+                  <p className="text-white text-sm font-semibold">{food.name}</p>
+                  <p className="text-gym text-xs mt-0.5">
+                    P {food.protein}g · C {food.carbs}g · F {food.fats}g · {food.calories} kcal
+                  </p>
+                  <p className="text-muted text-xs mt-0.5">
+                    Fiber {food.fiber ?? '—'}g · Sugar {food.sugar ?? '—'}g · Sodium {food.sodium ?? '—'}mg
+                  </p>
+                </div>
+              ))}
+              <button
+                onClick={handleLogAll}
+                className="w-full py-3 rounded-lg bg-cali/20 border border-cali/40 text-cali font-semibold text-sm"
+              >
+                Log All Meals
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="space-y-2">
         <h2 className="text-soft text-xs uppercase tracking-wider">Today's Meals</h2>
