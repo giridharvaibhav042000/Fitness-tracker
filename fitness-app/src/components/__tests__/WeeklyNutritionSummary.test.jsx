@@ -59,10 +59,13 @@ describe('WeeklyNutritionSummary', () => {
   })
 
   test('clicking a day tab changes selected day card', () => {
+    const key = todayKey()
+    localStorage.setItem('nutritionLogs', JSON.stringify([
+      { id: '1', date: key, protein: 50, carbs: 80, fats: 15, calories: 655 },
+    ]))
     render(<WeeklyNutritionSummary />)
-    const tabs = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    // Click a different tab and verify the card date label changes
-    fireEvent.click(screen.getByText(tabs[0]))
+    // Click Mon tab — if today is not Mon, the card should show "No meals logged"
+    fireEvent.click(screen.getByText('Mon'))
     expect(screen.getByText(/Mon ·/)).toBeInTheDocument()
   })
 })

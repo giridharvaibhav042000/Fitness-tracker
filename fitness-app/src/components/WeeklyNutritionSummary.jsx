@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { getWeekLogs } from '../services/nutritionService'
 import { MACRO_TARGETS } from '../data/nutrition'
 
@@ -17,6 +17,26 @@ function getWeekDates() {
 
 function todayDayIndex() {
   return (new Date().getDay() + 6) % 7
+}
+
+function computeWeekAvg(loggedDays, weekLogs) {
+  if (!loggedDays.length) return null
+  const sum = loggedDays.reduce(
+    (acc, d) => ({
+      protein:  acc.protein  + weekLogs[d].protein,
+      carbs:    acc.carbs    + weekLogs[d].carbs,
+      fats:     acc.fats     + weekLogs[d].fats,
+      calories: acc.calories + weekLogs[d].calories,
+    }),
+    { protein: 0, carbs: 0, fats: 0, calories: 0 }
+  )
+  const n = loggedDays.length
+  return {
+    protein:  Math.round(sum.protein  / n),
+    carbs:    Math.round(sum.carbs    / n),
+    fats:     Math.round(sum.fats     / n),
+    calories: Math.round(sum.calories / n),
+  }
 }
 
 function MacroRow({ label, current, target }) {
@@ -39,33 +59,14 @@ function MacroRow({ label, current, target }) {
 
 export default function WeeklyNutritionSummary() {
   const weekDates = getWeekDates()
-  const weekLogs  = getWeekLogs()
+  const weekLogs  = useMemo(() => getWeekLogs(), [])
   const [selectedDay, setSelectedDay] = useState(todayDayIndex())
 
   const selectedDate = weekDates[selectedDay]
   const selectedData = weekLogs[selectedDate]
 
   const loggedDays = weekDates.filter(d => weekLogs[d])
-  const avg = loggedDays.length
-    ? (() => {
-        const sum = loggedDays.reduce(
-          (acc, d) => ({
-            protein:  acc.protein  + weekLogs[d].protein,
-            carbs:    acc.carbs    + weekLogs[d].carbs,
-            fats:     acc.fats     + weekLogs[d].fats,
-            calories: acc.calories + weekLogs[d].calories,
-          }),
-          { protein: 0, carbs: 0, fats: 0, calories: 0 }
-        )
-        const n = loggedDays.length
-        return {
-          protein:  Math.round(sum.protein  / n),
-          carbs:    Math.round(sum.carbs    / n),
-          fats:     Math.round(sum.fats     / n),
-          calories: Math.round(sum.calories / n),
-        }
-      })()
-    : null
+  const avg = computeWeekAvg(loggedDays, weekLogs)
 
   return (
     <div className="bg-card border border-line rounded-xl p-4 space-y-4">
@@ -75,7 +76,7 @@ export default function WeeklyNutritionSummary() {
       <div className="flex gap-1 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
         {DAY_NAMES.map((name, i) => (
           <button
-            key={name}
+            key={weekDates[i]}
             onClick={() => setSelectedDay(i)}
             className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
               selectedDay === i
