@@ -107,6 +107,7 @@ export default function Nutrition() {
   const [aiResults, setAiResults]     = useState([])
   const [aiLoading, setAiLoading]     = useState(false)
   const [aiError, setAiError]         = useState(null)
+  const [aiLogging, setAiLogging]     = useState(false)
   const [loggedFlash, setLoggedFlash] = useState(false)
 
   const filtered = search.length > 1
@@ -140,6 +141,8 @@ export default function Nutrition() {
   }
 
   async function handleLogAll() {
+    if (aiLogging) return
+    setAiLogging(true)
     for (const food of aiResults) {
       await addMeal({
         meal_name: food.name,
@@ -151,6 +154,7 @@ export default function Nutrition() {
     }
     setAiResults([])
     setQuery('')
+    setAiLogging(false)
     setLoggedFlash(true)
     setTimeout(() => setLoggedFlash(false), 2000)
   }
@@ -226,7 +230,7 @@ export default function Nutrition() {
           <textarea
             value={query}
             onChange={e => setQuery(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleAnalyze() }}
+            onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleAnalyze() }}
             placeholder="Describe your meal... e.g. 2 chapatis, 1 bowl dal, 1 glass milk"
             rows={3}
             disabled={aiLoading}
@@ -254,7 +258,7 @@ export default function Nutrition() {
           {aiResults.length > 0 && (
             <div className="space-y-2">
               {aiResults.map((food, i) => (
-                <div key={i} className="bg-card border border-line rounded-xl p-3">
+                <div key={`${food.name}-${i}`} className="bg-card border border-line rounded-xl p-3">
                   <p className="text-white text-sm font-semibold">{food.name}</p>
                   <p className="text-gym text-xs mt-0.5">
                     P {food.protein}g · C {food.carbs}g · F {food.fats}g · {food.calories} kcal
@@ -266,9 +270,10 @@ export default function Nutrition() {
               ))}
               <button
                 onClick={handleLogAll}
-                className="w-full py-3 rounded-lg bg-cali/20 border border-cali/40 text-cali font-semibold text-sm"
+                disabled={aiLogging}
+                className="w-full py-3 rounded-lg bg-cali/20 border border-cali/40 text-cali font-semibold text-sm disabled:opacity-40"
               >
-                Log All Meals
+                {aiLogging ? 'Logging...' : 'Log All Meals'}
               </button>
             </div>
           )}
