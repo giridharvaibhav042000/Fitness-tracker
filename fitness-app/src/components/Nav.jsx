@@ -6,6 +6,7 @@ const TABS = [
   { to: '/nutrition', label: 'Nutrition', icon: '🥗' },
   { to: '/progress', label: 'Progress', icon: '📈' },
   { to: '/exercises', label: 'Library', icon: '▶' },
+  { to: '/programs', label: 'Programs', icon: '◈' },
 ]
 
 export default function Nav() {
@@ -20,11 +21,11 @@ export default function Nav() {
           to={tab.to}
           end={tab.to === '/'}
           className={({ isActive }) =>
-            `flex flex-col items-center gap-0.5 px-3 py-1 text-xs ${isActive ? 'text-gym' : 'text-muted'}`
+            `flex flex-col items-center gap-0.5 px-1 py-1 text-xs ${isActive ? 'text-gym' : 'text-muted'}`
           }
         >
-          <span className="text-lg leading-none">{tab.icon}</span>
-          <span>{tab.label}</span>
+          <span className="text-base leading-none">{tab.icon}</span>
+          <span style={{ fontSize: '10px' }}>{tab.label}</span>
         </NavLink>
       ))}
     </nav>
