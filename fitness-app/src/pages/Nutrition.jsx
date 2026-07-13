@@ -168,20 +168,23 @@ export default function Nutrition() {
   }
 
   async function handleManualLog() {
-    const p = parseFloat(manualP) || 0
-    const c = parseFloat(manualC) || 0
-    const f = parseFloat(manualF) || 0
-    await addMeal({
-      meal_name: manualLabel.trim() || 'Manual Entry',
-      protein:   p,
-      carbs:     c,
-      fats:      f,
-      calories:  Math.round(p * 4 + c * 4 + f * 9),
-    })
-    setManualLabel('')
-    setManualP('')
-    setManualC('')
-    setManualF('')
+    const p = Math.max(0, parseFloat(manualP) || 0)
+    const c = Math.max(0, parseFloat(manualC) || 0)
+    const f = Math.max(0, parseFloat(manualF) || 0)
+    try {
+      await addMeal({
+        meal_name: manualLabel.trim() || 'Manual Entry',
+        protein:   p,
+        carbs:     c,
+        fats:      f,
+        calories:  Math.round(p * 4 + c * 4 + f * 9),
+      })
+    } finally {
+      setManualLabel('')
+      setManualP('')
+      setManualC('')
+      setManualF('')
+    }
   }
 
   async function handleAdd(name, macros) {
