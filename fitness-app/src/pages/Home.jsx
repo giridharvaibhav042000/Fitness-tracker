@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { getPRs } from '../hooks/useProgress'
+import { getWorkoutStreak, getBestStreak } from '../services/workoutService'
 import { getTodayKey, WORKOUT_DATA, DAY_LABELS, isRestDay } from '../data/workouts'
 import { SPLITS, SPLIT_META, SPLIT_DATA } from '../data/splits'
 import { WORKOUT_MODES, MODE_LABELS, MODE_GOALS } from '../data/programs'
@@ -25,6 +26,8 @@ export default function Home() {
     : SPLIT_DATA[split]?.[todayKey]
   const prs = getPRs()
   const prCount = Object.keys(prs).length
+  const streak     = getWorkoutStreak()
+  const bestStreak = getBestStreak()
 
   const { goal, weekIndex, weekCycle, modifier } = useWorkoutPlan()
   const goalMeta = goal ? GOAL_META[goal] : null
@@ -131,15 +134,19 @@ export default function Home() {
       )}
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-card border border-line rounded-xl p-3 text-center">
+          <p className="text-gym text-xl font-bold font-mono">{streak}</p>
+          <p className="text-soft text-xs mt-1">Day Streak</p>
+        </div>
+        <div className="bg-card border border-line rounded-xl p-3 text-center">
+          <p className="text-gold text-xl font-bold font-mono">{bestStreak}</p>
+          <p className="text-soft text-xs mt-1">Best Streak</p>
+        </div>
         <div className="bg-card border border-line rounded-xl p-3 text-center">
           <p className="text-gold text-xl font-bold font-mono">{prCount}</p>
           <p className="text-soft text-xs mt-1">Personal Records</p>
         </div>
-        <Link to="/nutrition" className="bg-card border border-line rounded-xl p-3 text-center">
-          <p className="text-cardio text-xl font-bold font-mono">Track</p>
-          <p className="text-soft text-xs mt-1">Today's Nutrition</p>
-        </Link>
       </div>
     </div>
   )
