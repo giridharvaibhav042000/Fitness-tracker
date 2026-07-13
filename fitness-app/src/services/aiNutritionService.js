@@ -36,7 +36,8 @@ export async function analyzeText(text) {
   })
   if (!res.ok) throw new Error(String(res.status))
   const data = await res.json()
-  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text
+  if (!raw) throw new Error('Empty response from Gemini')
   const json = raw.replace(/```json?|```/g, '').trim()
   return JSON.parse(json)
 }

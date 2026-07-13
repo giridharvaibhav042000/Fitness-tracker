@@ -24,6 +24,7 @@ describe('aiNutritionService', () => {
   })
 
   afterEach(() => {
+    vi.clearAllMocks()
     vi.unstubAllGlobals()
     vi.unstubAllEnvs()
   })
@@ -55,6 +56,6 @@ describe('aiNutritionService', () => {
 
   test('analyzeText throws on malformed JSON in response', async () => {
     mockFetch(geminiResponse('not valid json at all'))
-    await expect(analyzeText('chapati')).rejects.toThrow()
+    await expect(analyzeText('chapati')).rejects.toThrow(SyntaxError)
   })
 })
