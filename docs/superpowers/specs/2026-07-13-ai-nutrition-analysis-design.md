@@ -1,7 +1,7 @@
 # AI Nutrition Analysis — Design Spec
 **Date:** 2026-07-13  
 **Status:** Approved  
-**Scope:** Nutrition page — new "AI Analyze" tab using Nutritionix API
+**Scope:** Nutrition page — new "AI Analyze" tab using Gemini Flash API
 
 ---
 
@@ -11,13 +11,16 @@ Allow users to describe a meal in natural language ("2 chapatis, 1 bowl dal, 1 g
 
 ---
 
-## API Choice: Nutritionix
+## API Choice: Gemini Flash (Google AI Studio)
 
-- **Endpoint:** `POST https://trackapi.nutritionix.com/v2/natural/nutrients`
-- **Auth:** `x-app-id` + `x-app-key` headers (free developer account)
-- **Free tier:** 500 requests/day
-- **Why:** Purpose-built food NLP backed by USDA + brand database. Returns accurate per-item macros and micros — unlike general LLMs which estimate and can hallucinate nutritional values.
-- **Sign up:** nutritionix.com/business/api (instant, free)
+- **Model:** `gemini-2.0-flash`
+- **Endpoint:** `POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=API_KEY`
+- **Auth:** single `VITE_GEMINI_API_KEY` in `.env.local`
+- **Free tier:** 1,500 requests/day, 15 RPM — more than enough for personal use
+- **Sign up:** aistudio.google.com → Get API key (instant, free)
+- **Accuracy note:** LLM estimation based on training data, not a food database. Values are reliable for common foods (chapati, dal, rice, chicken) but may vary slightly from exact lab measurements. Acceptable for personal macro tracking.
+
+> **Why not Nutritionix:** Free personal-use tier unavailable. Gemini is the best free alternative with a generous daily limit.
 
 ---
 
@@ -25,16 +28,16 @@ Allow users to describe a meal in natural language ("2 chapatis, 1 bowl dal, 1 g
 
 ### Integration approach: Client-side direct call
 
-React calls Nutritionix API directly from the browser. No backend proxy needed. Fits the existing PWA architecture (app already calls Supabase from client).
+React calls Gemini API directly from the browser with a structured prompt that forces JSON output. No backend proxy needed. Fits the existing PWA architecture (app already calls Supabase from client).
 
-API key exposure risk is acceptable: free-tier keys have a 500 req/day hard cap that limits abuse potential.
+API key exposure risk: Gemini free-tier keys are rate-limited at 15 RPM / 1500 req/day — limits abuse potential. Acceptable for personal PWA.
 
 ### New files
 
 | File | Purpose |
 |------|---------|
-| `src/services/nutritionixService.js` | Wraps Nutritionix API call, normalizes response |
-| `.env.local` | Holds `VITE_NUTRITIONIX_APP_ID` + `VITE_NUTRITIONIX_API_KEY` (gitignored) |
+| `src/services/aiNutritionService.js` | Wraps Gemini API call, parses JSON response, normalizes output |
+| `.env.local` | Holds `VITE_GEMINI_API_KEY` (gitignored) |
 
 ### Modified files
 
@@ -50,10 +53,10 @@ API key exposure risk is acceptable: free-tier keys have a 500 req/day hard cap 
 
 ```
 User types: "2 chapatis 1 bowl dal 1 glass milk"
-  → nutritionixService.analyzeText(text)
-  → POST /v2/natural/nutrients { query: text }
-  → Nutritionix returns array of food objects
-  → normalize to { name, protein, carbs, fats, calories, fiber, sugar, sodium }
+  → aiNutritionService.analyzeText(text)
+  → POST Gemini API with structured JSON prompt
+  → Gemini returns JSON array of food objects
+  → parse + normalize to { name, protein, carbs, fats, calories, fiber, sugar, sodium }
   → render food cards (macro + micro preview)
   → user taps "Log All"
   → nutritionService.logMeal() called per food (protein/carbs/fats/calories only)
@@ -62,36 +65,53 @@ User types: "2 chapatis 1 bowl dal 1 glass milk"
 
 ---
 
-## Service: `nutritionixService.js`
+## Service: `aiNutritionService.js`
 
 ```js
-const BASE = 'https://trackapi.nutritionix.com/v2'
-const HEADERS = {
-  'x-app-id': import.meta.env.VITE_NUTRITIONIX_APP_ID,
-  'x-app-key': import.meta.env.VITE_NUTRITIONIX_API_KEY,
-  'Content-Type': 'application/json',
-}
+const GEMINI_URL =
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
-// Returns normalized array, throws on network/API error
+const PROMPT_TEMPLATE = (text) => `
+Analyze this meal description and return ONLY a valid JSON array.
+No markdown, no explanation — raw JSON only.
+
+Meal: "${text}"
+
+Required format (numbers only, no units inside values):
+[
+  {
+    "name": "Food name with serving (e.g. Chapati 2 piece)",
+    "protein": 6,
+    "carbs": 30,
+    "fats": 0.8,
+    "calories": 152,
+    "fiber": 2,
+    "sugar": 0,
+    "sodium": 180
+  }
+]
+
+Use standard nutritional values per the serving size described.
+Return one object per distinct food item.
+`
+
 export async function analyzeText(text) {
-  const res = await fetch(`${BASE}/natural/nutrients`, {
-    method: 'POST',
-    headers: HEADERS,
-    body: JSON.stringify({ query: text }),
-  })
+  const res = await fetch(
+    `${GEMINI_URL}?key=${import.meta.env.VITE_GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: PROMPT_TEMPLATE(text) }] }],
+      }),
+    }
+  )
   if (!res.ok) throw new Error(res.status)
-  const { foods } = await res.json()
-  return foods.map(f => ({
-    name:     `${f.food_name} (${f.serving_qty} ${f.serving_unit})`,
-    protein:  f.nf_protein,
-    carbs:    f.nf_total_carbohydrate,
-    fats:     f.nf_total_fat,
-    calories: f.nf_calories,
-    // preview only — not persisted to log
-    fiber:    f.nf_dietary_fiber,
-    sugar:    f.nf_sugars,
-    sodium:   f.nf_sodium,
-  }))
+  const data = await res.json()
+  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+  // Strip markdown code fences if Gemini wraps the JSON
+  const json = raw.replace(/```json?|```/g, '').trim()
+  return JSON.parse(json)
 }
 ```
 
@@ -137,16 +157,17 @@ Results (one card per food):
 
 | Scenario | Message shown |
 |----------|---------------|
-| Network failure | "Can't reach Nutritionix — check connection" |
-| 400 unrecognized food | "Couldn't identify foods — try being more specific" |
-| 401 bad key | "API key invalid" (dev-facing only) |
-| Offline (`!navigator.onLine`) | Button disabled, tooltip shown |
+| Network failure | "Can't reach Gemini — check connection" |
+| JSON parse failure | "Couldn't parse food data — try rephrasing" |
+| 401 / 403 bad key | "API key invalid" (dev-facing only) |
+| 429 rate limited | "Too many requests — wait a moment and retry" |
+| Offline (`!navigator.onLine`) | Button disabled, label shown |
 
 ---
 
 ## Data Storage Decision
 
-Nutritionix returns fiber, sugar, and sodium per food item. These are shown in the result card preview but **not persisted** to the meal log.
+Gemini returns fiber, sugar, and sodium per food item. These are shown in the result card preview but **not persisted** to the meal log.
 
 Meal log entries store: `protein`, `carbs`, `fats`, `calories` only — matching the existing `nutritionService` schema. No schema migration required.
 
@@ -156,9 +177,10 @@ Meal log entries store: `protein`, `carbs`, `fats`, `calories` only — matching
 
 ```
 # .env.local (gitignored)
-VITE_NUTRITIONIX_APP_ID=your_app_id
-VITE_NUTRITIONIX_API_KEY=your_api_key
+VITE_GEMINI_API_KEY=your_gemini_api_key
 ```
+
+Get key free at: aistudio.google.com → Get API key
 
 ---
 
@@ -168,3 +190,4 @@ VITE_NUTRITIONIX_API_KEY=your_api_key
 - Storing micronutrients (fiber, sugar, sodium) in the log
 - Backend proxy for API key
 - Barcode scanning
+- Switching back to Nutritionix (revisit if personal free tier becomes available)
