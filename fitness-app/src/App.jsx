@@ -12,6 +12,7 @@ import DietPlan from './pages/DietPlan'
 import TrainingGuide from './pages/TrainingGuide'
 import WeekPlan from './pages/WeekPlan'
 import Programs from './pages/Programs'
+import Settings from './pages/Settings'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -38,6 +39,7 @@ function AppShell() {
         <Route path="/training-guide" element={<TrainingGuide />} />
         <Route path="/week-plan" element={<WeekPlan />} />
         <Route path="/programs" element={<Programs />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
       <Nav />
     </div>

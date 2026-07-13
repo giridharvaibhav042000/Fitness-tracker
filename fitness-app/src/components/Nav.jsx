@@ -7,6 +7,7 @@ const TABS = [
   { to: '/progress', label: 'Progress', icon: '📈' },
   { to: '/exercises', label: 'Library', icon: '▶' },
   { to: '/programs', label: 'Programs', icon: '◈' },
+  { to: '/settings', label: 'Settings', icon: '⚙' },
 ]
 
 export default function Nav() {
