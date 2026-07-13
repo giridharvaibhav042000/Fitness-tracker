@@ -143,20 +143,23 @@ export default function Nutrition() {
   async function handleLogAll() {
     if (aiLogging) return
     setAiLogging(true)
-    for (const food of aiResults) {
-      await addMeal({
-        meal_name: food.name,
-        protein:   food.protein,
-        carbs:     food.carbs,
-        fats:      food.fats,
-        calories:  food.calories,
-      })
+    try {
+      for (const food of aiResults) {
+        await addMeal({
+          meal_name: food.name,
+          protein:   food.protein,
+          carbs:     food.carbs,
+          fats:      food.fats,
+          calories:  food.calories,
+        })
+      }
+      setAiResults([])
+      setQuery('')
+      setLoggedFlash(true)
+      setTimeout(() => setLoggedFlash(false), 2000)
+    } finally {
+      setAiLogging(false)
     }
-    setAiResults([])
-    setQuery('')
-    setAiLogging(false)
-    setLoggedFlash(true)
-    setTimeout(() => setLoggedFlash(false), 2000)
   }
 
   async function handleAdd(name, macros) {
