@@ -27,8 +27,9 @@ function computeWeekAvg(loggedDays, weekLogs) {
       carbs:    acc.carbs    + weekLogs[d].carbs,
       fats:     acc.fats     + weekLogs[d].fats,
       calories: acc.calories + weekLogs[d].calories,
+      fiber:    acc.fiber    + (weekLogs[d].fiber ?? 0),
     }),
-    { protein: 0, carbs: 0, fats: 0, calories: 0 }
+    { protein: 0, carbs: 0, fats: 0, calories: 0, fiber: 0 }
   )
   const n = loggedDays.length
   return {
@@ -36,6 +37,7 @@ function computeWeekAvg(loggedDays, weekLogs) {
     carbs:    Math.round(sum.carbs    / n),
     fats:     Math.round(sum.fats     / n),
     calories: Math.round(sum.calories / n),
+    fiber:    Math.round(sum.fiber    / n),
   }
 }
 
@@ -103,9 +105,10 @@ export default function WeeklyNutritionSummary() {
         </div>
         {selectedData ? (
           <div className="space-y-2">
-            <MacroRow label="Protein" current={Math.round(selectedData.protein)} target={MACRO_TARGETS.protein} />
-            <MacroRow label="Carbs"   current={Math.round(selectedData.carbs)}   target={MACRO_TARGETS.carbs}   />
-            <MacroRow label="Fats"    current={Math.round(selectedData.fats)}    target={MACRO_TARGETS.fats}    />
+            <MacroRow label="Protein" current={Math.round(selectedData.protein)}         target={MACRO_TARGETS.protein} />
+            <MacroRow label="Carbs"   current={Math.round(selectedData.carbs)}           target={MACRO_TARGETS.carbs}   />
+            <MacroRow label="Fats"    current={Math.round(selectedData.fats)}            target={MACRO_TARGETS.fats}    />
+            <MacroRow label="Fiber"   current={Math.round(selectedData.fiber ?? 0)}      target={MACRO_TARGETS.fiber}   />
           </div>
         ) : (
           <p className="text-muted text-xs">No meals logged this day.</p>

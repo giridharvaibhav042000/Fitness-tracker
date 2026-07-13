@@ -30,7 +30,7 @@ describe('getWeekLogs', () => {
       { id: '2', date: key, protein: 20, carbs: 30, fats: 5,  calories: 245 },
     ]))
     const result = getWeekLogs()
-    expect(result[key]).toEqual({ protein: 50, carbs: 80, fats: 15, calories: 655 })
+    expect(result[key]).toEqual({ protein: 50, carbs: 80, fats: 15, calories: 655, fiber: 0 })
   })
 
   test('omits days with no logs', () => {

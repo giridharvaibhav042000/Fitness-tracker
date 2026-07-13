@@ -38,8 +38,13 @@ export function deleteMeal(id) {
 
 export function calcTotals(logs) {
   return logs.reduce(
-    (acc, l) => ({ protein: acc.protein + l.protein, carbs: acc.carbs + l.carbs, fats: acc.fats + l.fats }),
-    { protein: 0, carbs: 0, fats: 0 }
+    (acc, l) => ({
+      protein:  acc.protein  + l.protein,
+      carbs:    acc.carbs    + l.carbs,
+      fats:     acc.fats     + l.fats,
+      fiber:    acc.fiber    + (l.fiber ?? 0),
+    }),
+    { protein: 0, carbs: 0, fats: 0, fiber: 0 }
   )
 }
 
@@ -61,8 +66,9 @@ export function getWeekLogs() {
           carbs:    acc.carbs    + l.carbs,
           fats:     acc.fats     + l.fats,
           calories: acc.calories + l.calories,
+          fiber:    acc.fiber    + (l.fiber ?? 0),
         }),
-        { protein: 0, carbs: 0, fats: 0, calories: 0 }
+        { protein: 0, carbs: 0, fats: 0, calories: 0, fiber: 0 }
       )
     }
   }

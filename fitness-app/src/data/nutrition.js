@@ -19,6 +19,7 @@ export const MACRO_TARGETS = {
   protein: 125,
   carbs: 240,
   fats: 70,
+  fiber: 30,
 }
 
 export function calcCalories({ protein, carbs, fats }) {

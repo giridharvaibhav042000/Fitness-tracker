@@ -114,6 +114,7 @@ export default function Nutrition() {
   const [manualP, setManualP]         = useState('')
   const [manualC, setManualC]         = useState('')
   const [manualF, setManualF]         = useState('')
+  const [manualFiber, setManualFiber] = useState('')
 
   const filtered = search.length > 1
     ? Object.entries(FOOD_DATABASE).filter(([name]) =>
@@ -155,6 +156,7 @@ export default function Nutrition() {
           protein:   food.protein,
           carbs:     food.carbs,
           fats:      food.fats,
+          fiber:     food.fiber ?? 0,
           calories:  food.calories,
         })
       }
@@ -171,12 +173,14 @@ export default function Nutrition() {
     const p = Math.max(0, parseFloat(manualP) || 0)
     const c = Math.max(0, parseFloat(manualC) || 0)
     const f = Math.max(0, parseFloat(manualF) || 0)
+    const fb = Math.max(0, parseFloat(manualFiber) || 0)
     try {
       await addMeal({
         meal_name: manualLabel.trim() || 'Manual Entry',
         protein:   p,
         carbs:     c,
         fats:      f,
+        fiber:     fb,
         calories:  Math.round(p * 4 + c * 4 + f * 9),
       })
     } finally {
@@ -184,6 +188,7 @@ export default function Nutrition() {
       setManualP('')
       setManualC('')
       setManualF('')
+      setManualFiber('')
     }
   }
 
@@ -321,11 +326,12 @@ export default function Nutrition() {
               className="w-full bg-card border border-line rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-gym"
             />
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'Protein (g)', value: manualP, set: setManualP },
-              { label: 'Carbs (g)',   value: manualC, set: setManualC },
-              { label: 'Fats (g)',    value: manualF, set: setManualF },
+              { label: 'Protein (g)', value: manualP,     set: setManualP },
+              { label: 'Carbs (g)',   value: manualC,     set: setManualC },
+              { label: 'Fats (g)',    value: manualF,     set: setManualF },
+              { label: 'Fiber (g)',   value: manualFiber, set: setManualFiber },
             ].map(({ label, value, set }) => (
               <div key={label}>
                 <label className="text-soft text-xs mb-1 block">{label}</label>
