@@ -42,3 +42,29 @@ export function calcTotals(logs) {
     { protein: 0, carbs: 0, fats: 0 }
   )
 }
+
+export function getWeekLogs() {
+  const all = JSON.parse(localStorage.getItem(LS_NUTRITION) || '[]')
+  const today = new Date()
+  const monday = new Date(today)
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7))
+  const week = {}
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    const key = d.toISOString().split('T')[0]
+    const logs = all.filter(l => l.date === key)
+    if (logs.length) {
+      week[key] = logs.reduce(
+        (acc, l) => ({
+          protein:  acc.protein  + l.protein,
+          carbs:    acc.carbs    + l.carbs,
+          fats:     acc.fats     + l.fats,
+          calories: acc.calories + l.calories,
+        }),
+        { protein: 0, carbs: 0, fats: 0, calories: 0 }
+      )
+    }
+  }
+  return week
+}
