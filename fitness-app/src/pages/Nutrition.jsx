@@ -3,6 +3,7 @@ import { useNutrition } from '../hooks/useNutrition'
 import { FOOD_DATABASE, MACRO_TARGETS, calcCalories } from '../data/nutrition'
 import MacroBar from '../components/MacroBar'
 import { analyzeText } from '../services/aiNutritionService'
+import WeeklyNutritionSummary from '../components/WeeklyNutritionSummary'
 
 // ── Weekly diet plan data ─────────────────────────────────────────────────────
 
@@ -109,6 +110,10 @@ export default function Nutrition() {
   const [aiError, setAiError]         = useState(null)
   const [aiLogging, setAiLogging]     = useState(false)
   const [loggedFlash, setLoggedFlash] = useState(false)
+  const [manualLabel, setManualLabel] = useState('')
+  const [manualP, setManualP]         = useState('')
+  const [manualC, setManualC]         = useState('')
+  const [manualF, setManualF]         = useState('')
 
   const filtered = search.length > 1
     ? Object.entries(FOOD_DATABASE).filter(([name]) =>
@@ -162,6 +167,23 @@ export default function Nutrition() {
     }
   }
 
+  async function handleManualLog() {
+    const p = parseFloat(manualP) || 0
+    const c = parseFloat(manualC) || 0
+    const f = parseFloat(manualF) || 0
+    await addMeal({
+      meal_name: manualLabel.trim() || 'Manual Entry',
+      protein:   p,
+      carbs:     c,
+      fats:      f,
+      calories:  Math.round(p * 4 + c * 4 + f * 9),
+    })
+    setManualLabel('')
+    setManualP('')
+    setManualC('')
+    setManualF('')
+  }
+
   async function handleAdd(name, macros) {
     await addMeal({
       meal_name: name,
@@ -188,7 +210,7 @@ export default function Nutrition() {
 
       {/* ── Tab switcher ── */}
       <div className="flex gap-2">
-        {['search', 'ai'].map(tab => (
+        {['search', 'ai', 'manual'].map(tab => (
           <button
             key={tab}
             onClick={() => { setActiveTab(tab); setAiResults([]); setAiError(null); setSearch('') }}
@@ -198,7 +220,7 @@ export default function Nutrition() {
                 : 'bg-surface border-line text-muted'
             }`}
           >
-            {tab === 'search' ? 'Search Food' : '✦ AI Analyze'}
+            {tab === 'search' ? 'Search' : tab === 'ai' ? '✦ AI' : '✎ Manual'}
           </button>
         ))}
       </div>
@@ -283,6 +305,54 @@ export default function Nutrition() {
         </div>
       )}
 
+      {/* ── Manual tab ── */}
+      {activeTab === 'manual' && (
+        <div className="space-y-3">
+          <div>
+            <label className="text-soft text-xs mb-1 block">Label (optional)</label>
+            <input
+              type="text"
+              value={manualLabel}
+              onChange={e => setManualLabel(e.target.value)}
+              placeholder="e.g. Lunch, Post-workout"
+              className="w-full bg-card border border-line rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-gym"
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: 'Protein (g)', value: manualP, set: setManualP },
+              { label: 'Carbs (g)',   value: manualC, set: setManualC },
+              { label: 'Fats (g)',    value: manualF, set: setManualF },
+            ].map(({ label, value, set }) => (
+              <div key={label}>
+                <label className="text-soft text-xs mb-1 block">{label}</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={value}
+                  onChange={e => set(e.target.value)}
+                  className="w-full bg-card border border-line rounded-lg px-3 py-3 text-white text-sm focus:outline-none focus:border-gym"
+                />
+              </div>
+            ))}
+          </div>
+          <p className="text-muted text-xs text-right">
+            Calories: {Math.round(
+              (parseFloat(manualP) || 0) * 4 +
+              (parseFloat(manualC) || 0) * 4 +
+              (parseFloat(manualF) || 0) * 9
+            )} kcal
+          </p>
+          <button
+            onClick={handleManualLog}
+            disabled={(parseFloat(manualP) || 0) + (parseFloat(manualC) || 0) + (parseFloat(manualF) || 0) === 0}
+            className="w-full py-3 rounded-lg bg-gym text-black font-semibold text-sm disabled:opacity-40"
+          >
+            Log Macros
+          </button>
+        </div>
+      )}
+
       <div className="space-y-2">
         <h2 className="text-soft text-xs uppercase tracking-wider">Today's Meals</h2>
         {meals.length === 0 && <p className="text-muted text-sm">No meals logged yet.</p>}
@@ -296,6 +366,9 @@ export default function Nutrition() {
           </div>
         ))}
       </div>
+
+      <WeeklyNutritionSummary />
+
       {/* ── Weekly Diet Plan ── */}
       <div className="bg-card border border-line rounded-xl p-4 space-y-3">
         <h2 className="text-soft text-xs font-semibold uppercase tracking-wider">Weekly Diet Plan</h2>
