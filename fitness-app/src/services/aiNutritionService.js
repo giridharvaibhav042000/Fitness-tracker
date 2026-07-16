@@ -1,11 +1,6 @@
-const GEMINI_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+const OPENAI_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
-function buildPrompt(text) {
-  return `Analyze this meal description and return ONLY a valid JSON array.
-No markdown, no explanation — raw JSON only.
-
-Meal: "${text}"
+const SYSTEM_PROMPT = `You are a nutrition analysis assistant. When given a meal description, return ONLY a valid JSON array with nutritional data. No markdown, no explanation — raw JSON only.
 
 Required format (numbers only, no units inside values):
 [
@@ -21,23 +16,29 @@ Required format (numbers only, no units inside values):
   }
 ]
 
-Use standard nutritional values per the serving size described.
-Return one object per distinct food item.`
-}
+Use standard nutritional values per the serving size described. Return one object per distinct food item.`
 
 export async function analyzeText(text) {
-  const key = import.meta.env.VITE_GEMINI_API_KEY
-  const res = await fetch(`${GEMINI_URL}?key=${key}`, {
+  const key = import.meta.env.VITE_GROQ_API_KEY
+  const res = await fetch(OPENAI_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${key}`,
+    },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: buildPrompt(text) }] }],
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: `Analyze this meal: "${text}"` },
+      ],
+      temperature: 0,
     }),
   })
   if (!res.ok) throw new Error(String(res.status))
   const data = await res.json()
-  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text
-  if (!raw) throw new Error('Empty response from Gemini')
+  const raw = data.choices?.[0]?.message?.content
+  if (!raw) throw new Error('Empty response from OpenAI')
   const json = raw.replace(/```(?:json)?\n?|\n?```/g, '').trim()
   return JSON.parse(json)
 }

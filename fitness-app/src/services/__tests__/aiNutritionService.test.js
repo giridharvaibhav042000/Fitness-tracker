@@ -14,13 +14,13 @@ function mockFetch(responseBody, ok = true, status = 200) {
   }))
 }
 
-function geminiResponse(text) {
-  return { candidates: [{ content: { parts: [{ text }] } }] }
+function openaiResponse(text) {
+  return { choices: [{ message: { content: text } }] }
 }
 
 describe('aiNutritionService', () => {
   beforeEach(() => {
-    vi.stubEnv('VITE_GEMINI_API_KEY', 'test-key-123')
+    vi.stubEnv('VITE_GROQ_API_KEY', 'test-key-123')
   })
 
   afterEach(() => {
@@ -30,23 +30,23 @@ describe('aiNutritionService', () => {
   })
 
   test('analyzeText returns parsed food array on valid response', async () => {
-    mockFetch(geminiResponse(JSON.stringify(SAMPLE_FOODS)))
+    mockFetch(openaiResponse(JSON.stringify(SAMPLE_FOODS)))
     const result = await analyzeText('2 chapatis and 1 bowl dal')
     expect(result).toEqual(SAMPLE_FOODS)
   })
 
   test('analyzeText strips markdown code fences from response', async () => {
     const wrapped = '```json\n' + JSON.stringify(SAMPLE_FOODS) + '\n```'
-    mockFetch(geminiResponse(wrapped))
+    mockFetch(openaiResponse(wrapped))
     const result = await analyzeText('2 chapatis and 1 bowl dal')
     expect(result).toEqual(SAMPLE_FOODS)
   })
 
-  test('analyzeText includes API key in request URL', async () => {
-    mockFetch(geminiResponse(JSON.stringify(SAMPLE_FOODS)))
+  test('analyzeText sends Authorization header with API key', async () => {
+    mockFetch(openaiResponse(JSON.stringify(SAMPLE_FOODS)))
     await analyzeText('chapati')
-    const [url] = vi.mocked(fetch).mock.calls[0]
-    expect(url).toContain('key=test-key-123')
+    const [, opts] = vi.mocked(fetch).mock.calls[0]
+    expect(opts.headers['Authorization']).toBe('Bearer test-key-123')
   })
 
   test('analyzeText throws with status code on non-ok response', async () => {
@@ -55,7 +55,7 @@ describe('aiNutritionService', () => {
   })
 
   test('analyzeText throws on malformed JSON in response', async () => {
-    mockFetch(geminiResponse('not valid json at all'))
+    mockFetch(openaiResponse('not valid json at all'))
     await expect(analyzeText('chapati')).rejects.toThrow(SyntaxError)
   })
 })
