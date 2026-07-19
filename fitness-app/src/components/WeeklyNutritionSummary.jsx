@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { getWeekLogs } from '../services/nutritionService'
 import { MACRO_TARGETS } from '../data/nutrition'
 
@@ -59,10 +59,18 @@ function MacroRow({ label, current, target }) {
   )
 }
 
-export default function WeeklyNutritionSummary() {
+export default function WeeklyNutritionSummary({ refreshKey, highlightDate }) {
   const weekDates = getWeekDates()
-  const weekLogs  = useMemo(() => getWeekLogs(), [])
-  const [selectedDay, setSelectedDay] = useState(todayDayIndex())
+  const weekLogs  = useMemo(() => getWeekLogs(), [refreshKey])
+
+  const highlightIdx = highlightDate ? weekDates.indexOf(highlightDate) : -1
+  const [selectedDay, setSelectedDay] = useState(() =>
+    highlightIdx >= 0 ? highlightIdx : todayDayIndex()
+  )
+
+  useEffect(() => {
+    if (highlightIdx >= 0) setSelectedDay(highlightIdx)
+  }, [highlightIdx])
 
   const selectedDate = weekDates[selectedDay]
   const selectedData = weekLogs[selectedDate]

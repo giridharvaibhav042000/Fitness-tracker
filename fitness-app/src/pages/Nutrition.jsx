@@ -519,7 +519,7 @@ export default function Nutrition() {
         ))}
       </div>
 
-      <WeeklyNutritionSummary />
+      <WeeklyNutritionSummary refreshKey={meals.length} highlightDate={selectedDate} />
 
       {/* ── Weekly Diet Plan ── */}
       <div className="bg-card border border-line rounded-xl p-4 space-y-3">
