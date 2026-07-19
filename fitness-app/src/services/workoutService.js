@@ -45,6 +45,15 @@ export function getSessionLogs(sessionId) {
   return logs.filter(l => l.session_id === sessionId)
 }
 
+export function updateSet(id, updates) {
+  const logs = JSON.parse(localStorage.getItem(LS_LOGS) || '[]')
+  const updated = logs.map(l => l.id === id ? { ...l, ...updates } : l)
+  localStorage.setItem(LS_LOGS, JSON.stringify(updated))
+  supabase.from('exercise_logs').update(updates).eq('id', id).then(({ error }) => {
+    if (error) queueForSync('exercise_logs', updated.find(l => l.id === id))
+  })
+}
+
 function syncToSupabase(table, record) {
   supabase.from(table).upsert(record).then(({ error }) => {
     if (error) queueForSync(table, record)

@@ -1,22 +1,32 @@
 import { useState, useCallback } from 'react'
 import { useAuth } from './useAuth'
-import { getTodayLogs, logMeal, deleteMeal, calcTotals } from '../services/nutritionService'
+import { getLogsByDate, logMeal, deleteMeal, calcTotals } from '../services/nutritionService'
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0]
+}
 
 export function useNutrition() {
   const { user } = useAuth()
-  const [meals, setMeals] = useState(() => getTodayLogs())
+  const [selectedDate, setSelectedDate] = useState(todayStr)
+  const [meals, setMeals] = useState(() => getLogsByDate(todayStr()))
+
+  function changeDate(date) {
+    setSelectedDate(date)
+    setMeals(getLogsByDate(date))
+  }
 
   const addMeal = useCallback(async (meal) => {
     if (!user) return
-    const entry = await logMeal(user.id, meal)
+    const entry = await logMeal(user.id, meal, selectedDate)
     setMeals(prev => [...prev, entry])
     return entry
-  }, [user])
+  }, [user, selectedDate])
 
   const removeMeal = useCallback((id) => {
     deleteMeal(id)
     setMeals(prev => prev.filter(m => m.id !== id))
   }, [])
 
-  return { meals, totals: calcTotals(meals), addMeal, removeMeal }
+  return { meals, totals: calcTotals(meals), addMeal, removeMeal, selectedDate, changeDate, todayStr: todayStr() }
 }

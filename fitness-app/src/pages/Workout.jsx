@@ -73,7 +73,7 @@ export default function Workout() {
   }
 
   const sessionType = mode === WORKOUT_MODES.CALI_ONLY ? 'cali' : 'gym'
-  const { logs, recordSet } = useWorkout(dayKey, sessionType)
+  const { logs, recordSet, editSet } = useWorkout(dayKey, sessionType)
   const { newPR, checkAndSavePR } = useProgress()
   const [activeExercise, setActiveExercise] = useState(null)
 
@@ -153,6 +153,7 @@ export default function Workout() {
               exercise={exercise}
               sessionSets={logs}
               onLogSet={(ex, setNum) => setActiveExercise({ exercise: ex, setNumber: setNum })}
+              onEditSet={editSet}
             />
           ))}
         </div>

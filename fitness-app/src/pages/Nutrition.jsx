@@ -96,8 +96,20 @@ function fmtItem(name, qty) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+function fmtDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00')
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+}
+
+function shiftDate(dateStr, days) {
+  const d = new Date(dateStr + 'T00:00:00')
+  d.setDate(d.getDate() + days)
+  return d.toISOString().split('T')[0]
+}
+
 export default function Nutrition() {
-  const { meals, totals, addMeal, removeMeal } = useNutrition()
+  const { meals, totals, addMeal, removeMeal, selectedDate, changeDate, todayStr } = useNutrition()
+  const isToday = selectedDate === todayStr
   const [search, setSearch] = useState('')
   const [planDay, setPlanDay] = useState(() => {
     const d = new Date().getDay() // 0=Sun
@@ -257,6 +269,26 @@ export default function Nutrition() {
   return (
     <div className="p-4 space-y-4">
       <h1 className="text-white font-display text-xl font-bold">Nutrition</h1>
+
+      {/* ── Date navigator ── */}
+      <div className="flex items-center justify-between bg-card border border-line rounded-xl px-4 py-2">
+        <button
+          onClick={() => changeDate(shiftDate(selectedDate, -1))}
+          className="text-muted text-sm px-2 py-1"
+        >
+          ←
+        </button>
+        <span className="text-white text-sm font-semibold">
+          {isToday ? 'Today' : fmtDate(selectedDate)}
+        </span>
+        <button
+          onClick={() => changeDate(shiftDate(selectedDate, 1))}
+          disabled={isToday}
+          className="text-muted text-sm px-2 py-1 disabled:opacity-30"
+        >
+          →
+        </button>
+      </div>
 
       <div className="bg-card border border-line rounded-xl p-4 space-y-3">
         <MacroBar label="Protein" current={totals.protein} target={MACRO_TARGETS.protein} type="protein" />
@@ -472,8 +504,10 @@ export default function Nutrition() {
       )}
 
       <div className="space-y-2">
-        <h2 className="text-soft text-xs uppercase tracking-wider">Today's Meals</h2>
-        {meals.length === 0 && <p className="text-muted text-sm">No meals logged yet.</p>}
+        <h2 className="text-soft text-xs uppercase tracking-wider">
+          {isToday ? "Today's Meals" : `${fmtDate(selectedDate)} Meals`}
+        </h2>
+        {meals.length === 0 && <p className="text-muted text-sm">No meals logged{isToday ? ' yet' : ' for this day'}.</p>}
         {meals.map(meal => (
           <div key={meal.id} className="flex items-center justify-between bg-card border border-line rounded-xl px-4 py-3">
             <div>

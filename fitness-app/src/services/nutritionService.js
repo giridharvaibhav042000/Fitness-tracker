@@ -12,11 +12,16 @@ export function getTodayLogs() {
   return all.filter(l => l.date === today())
 }
 
-export async function logMeal(userId, meal) {
+export function getLogsByDate(date) {
+  const all = JSON.parse(localStorage.getItem(LS_NUTRITION) || '[]')
+  return all.filter(l => l.date === date)
+}
+
+export async function logMeal(userId, meal, date) {
   const entry = {
     id: crypto.randomUUID(),
     user_id: userId,
-    date: today(),
+    date: date ?? today(),
     ...meal,
   }
   const all = JSON.parse(localStorage.getItem(LS_NUTRITION) || '[]')
