@@ -1,6 +1,16 @@
 import { useState } from 'react'
 
-export default function ExerciseCard({ exercise, onLogSet, onEditSet, sessionSets = [] }) {
+function parseMinReps(reps) {
+  if (typeof reps === 'number') return reps
+  const s = String(reps)
+  const m = s.match(/^(\d+)/)
+  return m ? parseInt(m[1]) : 0
+}
+
+export default function ExerciseCard({ exercise, onLogSet, onEditSet, lastSet, sessionSets = [] }) {
+  const suggestWeight = lastSet && lastSet.reps >= parseMinReps(exercise.reps)
+    ? Math.round((lastSet.weight + 2.5) * 2) / 2
+    : null
   const completedSets = sessionSets.filter(s => s.exercise_name === exercise.name)
   const [editingIdx, setEditingIdx] = useState(null)
   const [editWeight, setEditWeight] = useState('')
@@ -41,9 +51,18 @@ export default function ExerciseCard({ exercise, onLogSet, onEditSet, sessionSet
         </a>
       </div>
 
-      <p className="text-muted text-xs mb-3">
+      <p className="text-muted text-xs">
         {exercise.sets} sets × {exercise.reps} reps · Rest {exercise.rest}s
       </p>
+      {lastSet && (
+        <p className="text-muted text-xs mb-3 mt-0.5">
+          <span>Last: {lastSet.weight}kg × {lastSet.reps}</span>
+          {suggestWeight && (
+            <span className="text-gym ml-2">→ Try {suggestWeight}kg</span>
+          )}
+        </p>
+      )}
+      {!lastSet && <div className="mb-3" />}
 
       <div className="flex gap-1 flex-wrap">
         {Array.from({ length: exercise.sets }).map((_, i) => {

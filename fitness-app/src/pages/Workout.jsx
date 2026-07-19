@@ -5,6 +5,7 @@ import { SPLITS, SPLIT_DATA, SPLIT_META } from '../data/splits'
 import { WORKOUT_MODES, MODE_LABELS, HIIT_EXERCISES, WARMUP_EXERCISES } from '../data/programs'
 import { GOAL_META } from '../data/variations'
 import { useWorkout } from '../hooks/useWorkout'
+import { getLastSetForExercise } from '../services/workoutService'
 import { useProgress } from '../hooks/useProgress'
 import { useWorkoutPlan } from '../hooks/useWorkoutPlan'
 import ExerciseCard from '../components/ExerciseCard'
@@ -152,6 +153,7 @@ export default function Workout() {
               key={exercise.name}
               exercise={exercise}
               sessionSets={logs}
+              lastSet={getLastSetForExercise(exercise.name, session?.id)}
               onLogSet={(ex, setNum) => setActiveExercise({ exercise: ex, setNumber: setNum })}
               onEditSet={editSet}
             />

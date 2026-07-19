@@ -45,6 +45,23 @@ export function getSessionLogs(sessionId) {
   return logs.filter(l => l.session_id === sessionId)
 }
 
+export function getLastSetForExercise(exerciseName, excludeSessionId) {
+  const logs = JSON.parse(localStorage.getItem(LS_LOGS) || '[]')
+  const relevant = logs.filter(l =>
+    l.exercise_name === exerciseName && l.session_id !== excludeSessionId
+  )
+  if (!relevant.length) return null
+  // pick the heaviest set across the most recent session
+  const sessions = JSON.parse(localStorage.getItem(LS_SESSIONS) || '[]')
+  const sessionDates = Object.fromEntries(sessions.map(s => [s.id, s.date]))
+  const sorted = [...relevant].sort((a, b) => {
+    const da = sessionDates[a.session_id] || ''
+    const db = sessionDates[b.session_id] || ''
+    return db.localeCompare(da) || b.weight - a.weight
+  })
+  return { weight: sorted[0].weight, reps: sorted[0].reps }
+}
+
 export function updateSet(id, updates) {
   const logs = JSON.parse(localStorage.getItem(LS_LOGS) || '[]')
   const updated = logs.map(l => l.id === id ? { ...l, ...updates } : l)

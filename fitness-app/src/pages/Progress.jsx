@@ -119,6 +119,19 @@ function WeightChart({ measurements }) {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+function epley(weight, reps) {
+  if (!weight || !reps || reps <= 0) return null
+  const raw = weight * (1 + reps / 30)
+  return Math.round(raw * 2) / 2  // round to nearest 0.5kg
+}
+
+const ONE_RM_ZONES = [
+  { pct: 0.95, label: 'Strength',    reps: '1–3' },
+  { pct: 0.85, label: 'Power',       reps: '~5'  },
+  { pct: 0.75, label: 'Hypertrophy', reps: '8–10' },
+  { pct: 0.65, label: 'Endurance',   reps: '12–15' },
+]
+
 function today()   { return new Date().toISOString().split('T')[0] }
 function nowTime() { return new Date().toTimeString().slice(0, 5) }
 
@@ -265,6 +278,10 @@ export default function Progress() {
     if (editingId === id) setEditingId(null)
     if (user) supabase.from('body_measurements').delete().eq('id', id)
   }
+
+  // ── 1RM Calculator ──
+  const [oneRmWeight, setOneRmWeight] = useState('')
+  const [oneRmReps,   setOneRmReps]   = useState('')
 
   const PAGE      = 7
   const displayed = showAll ? sortedMeasurements : sortedMeasurements.slice(0, PAGE)
@@ -613,7 +630,7 @@ export default function Progress() {
         )}
       </div>
 
-      {/* ── Personal Records ── */}
+      {/* ── Personal Records + auto 1RM ── */}
       <div>
         <h2 className="text-soft text-xs font-semibold uppercase tracking-wider mb-3">
           Personal Records ({prList.length})
@@ -622,14 +639,76 @@ export default function Progress() {
           <p className="text-muted text-sm">No PRs yet. Start logging sets!</p>
         )}
         <div className="space-y-2">
-          {prList.map(([name, pr]) => (
-            <div key={name}
-              className="flex items-center justify-between bg-card border border-line rounded-xl px-4 py-3">
-              <p className="text-white text-sm">{name}</p>
-              <p className="text-gold font-mono text-sm">{pr.weight}kg × {pr.reps}</p>
-            </div>
-          ))}
+          {prList.map(([name, pr]) => {
+            const est1rm = epley(pr.weight, pr.reps)
+            return (
+              <div key={name}
+                className="flex items-center justify-between bg-card border border-line rounded-xl px-4 py-3">
+                <div>
+                  <p className="text-white text-sm">{name}</p>
+                  {est1rm && <p className="text-muted text-xs">~1RM: {est1rm} kg</p>}
+                </div>
+                <p className="text-gold font-mono text-sm">{pr.weight}kg × {pr.reps}</p>
+              </div>
+            )
+          })}
         </div>
+      </div>
+
+      {/* ── 1RM Calculator ── */}
+      <div className="bg-card border border-line rounded-xl p-4 space-y-3">
+        <SectionHeader title="1RM Calculator" />
+        <p className="text-muted text-xs">Epley formula — enter any working set</p>
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <label className="text-muted text-xs block mb-1">Weight (kg)</label>
+            <input
+              type="number"
+              value={oneRmWeight}
+              onChange={e => setOneRmWeight(e.target.value)}
+              placeholder="e.g. 80"
+              className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gym"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="text-muted text-xs block mb-1">Reps</label>
+            <input
+              type="number"
+              value={oneRmReps}
+              onChange={e => setOneRmReps(e.target.value)}
+              placeholder="e.g. 5"
+              className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gym"
+            />
+          </div>
+        </div>
+        {(() => {
+          const w = parseFloat(oneRmWeight)
+          const r = parseInt(oneRmReps)
+          const est = epley(w, r)
+          if (!est) return null
+          return (
+            <div className="space-y-2">
+              <div className="bg-surface border border-gym/30 rounded-xl px-4 py-3 text-center">
+                <p className="text-gym text-3xl font-bold font-mono">{est} kg</p>
+                <p className="text-muted text-xs mt-0.5">Estimated 1RM</p>
+              </div>
+              <div className="space-y-1.5">
+                {ONE_RM_ZONES.map(z => (
+                  <div key={z.label} className="flex items-center justify-between bg-surface rounded-lg px-3 py-2">
+                    <div>
+                      <span className="text-soft text-xs font-semibold">{z.label}</span>
+                      <span className="text-muted text-xs ml-2">{z.reps} reps</span>
+                    </div>
+                    <span className="text-white font-mono text-sm">
+                      {(Math.round(est * z.pct * 2) / 2).toFixed(1)} kg
+                      <span className="text-muted text-xs ml-1">({Math.round(z.pct * 100)}%)</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
       </div>
 
       {/* ── Suggested additions ── */}
@@ -641,7 +720,6 @@ export default function Progress() {
             { icon: '🔥', title: 'Workout Streak',   desc: 'Consecutive days trained, weekly volume, monthly heatmap' },
             { icon: '💧', title: 'Water Intake',     desc: 'Daily hydration tracking (ml) with target reminders' },
             { icon: '😴', title: 'Sleep Tracker',    desc: 'Hours slept + quality score — linked to recovery split' },
-            { icon: '🏋', title: '1RM Calculator',   desc: 'Estimate max from working sets (Epley / Brzycki formula)' },
           ].map(s => (
             <div key={s.title} className="flex gap-3 items-start">
               <span className="text-lg flex-shrink-0 mt-0.5">{s.icon}</span>
