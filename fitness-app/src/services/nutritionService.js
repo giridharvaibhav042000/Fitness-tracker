@@ -3,8 +3,16 @@ import { supabase } from './supabase'
 const LS_NUTRITION = 'nutritionLogs'
 const LS_QUEUE = 'offlineQueue'
 
+function localDateStr(d) {
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-')
+}
+
 function today() {
-  return new Date().toISOString().split('T')[0]
+  return localDateStr(new Date())
 }
 
 export function getTodayLogs() {
@@ -62,7 +70,7 @@ export function getWeekLogs() {
   for (let i = 0; i < 7; i++) {
     const d = new Date(monday)
     d.setDate(monday.getDate() + i)
-    const key = d.toISOString().split('T')[0]
+    const key = localDateStr(d)
     const logs = all.filter(l => l.date === key)
     if (logs.length) {
       week[key] = logs.reduce(

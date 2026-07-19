@@ -96,6 +96,14 @@ function fmtItem(name, qty) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+function localDateStr(d) {
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-')
+}
+
 function fmtDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00')
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
@@ -104,7 +112,7 @@ function fmtDate(dateStr) {
 function shiftDate(dateStr, days) {
   const d = new Date(dateStr + 'T00:00:00')
   d.setDate(d.getDate() + days)
-  return d.toISOString().split('T')[0]
+  return localDateStr(d)
 }
 
 export default function Nutrition() {

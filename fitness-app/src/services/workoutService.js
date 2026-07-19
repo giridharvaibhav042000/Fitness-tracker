@@ -4,8 +4,16 @@ const LS_SESSIONS = 'workoutSessions'
 const LS_LOGS = 'exerciseLogs'
 const LS_QUEUE = 'offlineQueue'
 
+function localDateStr(d) {
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-')
+}
+
 function today() {
-  return new Date().toISOString().split('T')[0]
+  return localDateStr(new Date())
 }
 
 export async function getOrCreateSession(userId, dayKey, type) {

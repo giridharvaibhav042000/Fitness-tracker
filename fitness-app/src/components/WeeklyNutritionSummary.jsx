@@ -4,6 +4,14 @@ import { MACRO_TARGETS } from '../data/nutrition'
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
+function localDateStr(d) {
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-')
+}
+
 function getWeekDates() {
   const today = new Date()
   const monday = new Date(today)
@@ -11,7 +19,7 @@ function getWeekDates() {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday)
     d.setDate(monday.getDate() + i)
-    return d.toISOString().split('T')[0]
+    return localDateStr(d)
   })
 }
 
