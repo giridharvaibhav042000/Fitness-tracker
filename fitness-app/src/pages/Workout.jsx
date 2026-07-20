@@ -74,7 +74,7 @@ export default function Workout() {
   }
 
   const sessionType = mode === WORKOUT_MODES.CALI_ONLY ? 'cali' : 'gym'
-  const { logs, recordSet, editSet } = useWorkout(dayKey, sessionType)
+  const { session, logs, recordSet, editSet } = useWorkout(dayKey, sessionType)
   const { newPR, checkAndSavePR } = useProgress()
   const [activeExercise, setActiveExercise] = useState(null)
 
