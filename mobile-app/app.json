@@ -1,31 +1,37 @@
 {
   "expo": {
-    "name": "mobile-app",
-    "slug": "mobile-app",
+    "name": "Fitness Tracker",
+    "slug": "fitness-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "fitnesstracker",
+    "userInterfaceStyle": "dark",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f0f0f"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.kilowott.fitnesstracker"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#0f0f0f"
       },
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+      "package": "com.kilowott.fitnesstracker"
     },
     "plugins": [
       "expo-router",
-      "expo-sharing",
-      "expo-font",
-      "expo-splash-screen"
-    ]
+      ["expo-camera", { "cameraPermission": "Allow Fitness Tracker to access your camera to analyse meals." }],
+      ["expo-notifications", { "color": "#a3e635" }],
+      ["expo-local-authentication", { "faceIDPermission": "Allow Fitness Tracker to use Face ID for login." }],
+      "expo-file-system"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }
