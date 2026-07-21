@@ -53,7 +53,7 @@ export default function DayScreen() {
     ).then(entries => {
       setLastSets(Object.fromEntries(entries))
     })
-  }, [session, day])
+  }, [session, day, mode])
 
   const handleLogSet = useCallback((exercise: any, setNumber: number, weight: number, reps: number) => {
     setSetLoggerState({ exercise, setNumber, defaultWeight: weight, defaultReps: reps })
